@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Línea de Tiempo del Perú</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+body{
+    margin:0;
+    background:#0d0d0d;
+    font-family:'Inter',sans-serif;
+    color:#eee;
+}
+
+.header{
+    text-align:center;
+    padding:80px 20px;
+    background:linear-gradient(135deg,#111,#1a1a1a);
+}
+
+.header h1{
+    font-family:'Playfair Display',serif;
+    font-size:60px;
+    margin:0;
+}
+
+.header p{
+    color:#aaa;
+}
+
+.autor{
+    margin-top:10px;
+    color:#777;
+    font-size:14px;
+}
+
+.timeline{
+    position:relative;
+    max-width:1200px;
+    margin:auto;
+    padding:40px 0;
+}
+
+.timeline::after{
+    content:'';
+    position:absolute;
+    width:4px;
+    background:#c49b3d;
+    top:0;
+    bottom:0;
+    left:50%;
+}
+
+.row{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin:60px 0;
+    opacity:0;
+    transform:translateY(40px);
+    transition:0.6s;
+}
+
+.row.show{
+    opacity:1;
+    transform:translateY(0);
+}
+
+.box{
+    width:40%;
+    background:#1a1a1a;
+    padding:20px;
+    border-radius:10px;
+}
+
+.text{
+    font-size:14px;
+    color:#ccc;
+    line-height:1.6;
+}
+
+.date{
+    display:block;
+    color:#7cc4a1;
+    font-weight:600;
+    margin-bottom:8px;
+    font-size:13px;
+    letter-spacing:0.5px;
+}
+
+.img-box img{
+    width:100%;
+    height:200px;
+    object-fit:cover;
+    border-radius:8px;
+}
+
+@media(max-width:900px){
+    .timeline::after{ left:20px; }
+
+    .row{
+        flex-direction:column;
+        gap:20px;
+    }
+
+    .box{
+        width:90%;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>Historia del Perú</h1>
+    <p>67 momentos clave en la historia del Perú que marcaron su desarrollo</p>
+    <div class="autor">Estudiante: Rafael Ramírez Medina</div>
+</div>
+
+<div class="timeline" id="timeline"></div>
+
+<script>
+
+const eventos = [
+`13 000 a. C., Llegada aproximada de los primeros seres humanos al territorio peruano desde Asia. Pleistoceno`,
+`5000 a. C., Inicio del Protoneolítico en Perú con aparición de la agricultura y comienzo del sedentarismo`,
+`3200 a. C., Aparición de la civilización de Caral en la costa central del Perú`,
+`200 a. C., Declive de la cultura Chavín como centro dominante de sociedades agrícolas`,
+`año 1000, Inicio de la decadencia del Imperio Huari (primero del Perú)`,
+`1438, Los incas derrotan a los chancas e inician la expansión imperial`,
+`1492, Llegada de Cristóbal Colón a América`,
+`1531, Inicio del tercer viaje de Pizarro hacia el Perú`,
+`15 de agosto de 1532, Fundación de San Miguel de Piura, primera ciudad española en Perú`,
+`16 de noviembre de 1532, Captura de Atahualpa en Cajamarca`,
+`26 de julio de 1533, Ejecución de Atahualpa`,
+`1534, Toma de Cuzco por los españoles, considerada el final de la conquista española`,
+`1538, Ejecución de Diego de Almagro tras conflicto con Pizarro`,
+`1541, Asesinato de Francisco Pizarro por los partidarios de Almagro el Mozo`,
+`20 de noviembre de 1542, Creación del Virreinato del Perú mediante las Nuevas Leyes de Indias`,
+`1 de marzo de 1543, Nombramiento de Blasco Núñez Vela como primer virrey del Perú`,
+`1548, Derrota y ejecución de Gonzalo Pizarro tras rebelión contra la Corona`,
+`siglo XVIII, Implementación de las Reformas Borbónicas en América`,
+`8 de septiembre de 1820, Llegada del ejército de San Martín al puerto de Pisco`,
+`1821, Toma de Lima por San Martín`,
+`28 de julio de 1821, Proclamación de la independencia del Perú`,
+`1824, Batalla de Ayacucho y fin del Virreinato del Perú`,
+`enero de 1826, Caída de los últimos focos de resistencia española`,
+`finales de enero de 1827, Insurrección en Lima contra el gobierno bolivariano`,
+`1827, Inicio del periodo del Primer Militarismo`,
+`1828, Guerra entre Perú y la Gran Colombia`,
+`septiembre de 1829, Tratado de paz entre Perú y la Gran Colombia`,
+`1836, Fin aproximado del primer periodo del militarismo inicial`,
+`junio de 1837, Creación de la Confederación Peruano-Boliviana`,
+`enero de 1839, Disolución de la Confederación tras derrota militar`,
+`1842 – 1844, Periodo de Anarquía Militar`,
+`1845 – 1872, Periodo denominado Prosperidad Falaz`,
+`1858, Fin de la guerra civil iniciada por conflictos constitucionales (40 mil peruanos fallecidos)`,
+`1865, Invasión española de las islas Chincha, ricas en guano`,
+`mayo de 1866, Retirada de la armada española del Perú`,
+`1872, Elección de Manuel Pardo como primer presidente civil`,
+`22 de julio de 1872, Intento de golpe de Estado contra el gobierno civil`,
+`1875, Nacionalización del salitre`,
+`1879, Inicio de la Guerra del Pacífico`,
+`1879 – 1883, Desarrollo de la Guerra del Pacífico`,
+`1884 – 1885, Guerra civil entre partidarios de Iglesias y Cáceres`,
+`marzo de 1895, Ataque de Piérola a Lima`,
+`1914, Golpe de Estado de Óscar R. Benavides`,
+`1919, Inicio del Oncenio de Leguía mediante golpe de Estado`,
+`1929, Impacto de la Gran Depresión en Perú`,
+`1930, Golpe de Estado de Luis Sánchez Cerro`,
+`1931, Elección de Sánchez Cerro como presidente`,
+`22 de octubre de 1939, Elecciones generales ganadas por Manuel Prado`,
+`1941, Guerra entre Perú y Ecuador`,
+`1945, Elección de José Luis Bustamante`,
+`octubre de 1948, Golpe de Estado de Manuel A. Odría`,
+`1948 – 1950, Junta Militar de Gobierno de Odría`,
+`1950 – 1956, Gobierno constitucional de Odría`,
+`1955, Revolución en Arequipa`,
+`1956, Elecciones generales tras el fin del régimen de Odría`,
+`1963 – 1968, Gobierno de Fernando Belaúnde Terry`,
+`3 de octubre de 1968, Golpe de Estado de Juan Velasco Alvarado`,
+`1975, Golpe de Estado (Tacnazo) que lleva al poder a Morales Bermúdez`,
+`1978, Convocatoria a Asamblea Constituyente`,
+`1980, Retorno a la democracia y surgimiento del terrorismo en Perú`,
+`década de 1990, Desarticulación de Sendero Luminoso por el gobierno de Alberto Fujimori`,
+`año 2000, Caída del régimen de Fujimori y transición democrática`,
+`2001 – 2006, Gobierno de Alejandro Toledo`,
+`2006, Elección de Alan García`,
+`2011, Elección de Ollanta Humala`,
+`enero de 2014, Fallo de La Haya favorable al Perú en disputa marítima con Chile`,
+`marzo de 2018, Renuncia de Pedro Pablo Kuczynski. Martín Vizcarra como nuevo presidente`
+];
+
+const container = document.getElementById("timeline");
+
+eventos.forEach((texto, i)=>{
+    const row = document.createElement("div");
+    row.className="row";
+
+    const partes = texto.split(",");
+    const fecha = partes.shift();
+    const contenido = partes.join(",");
+
+    const htmlTexto = `<span class="date">${fecha}</span>${contenido}`;
+
+    if(i%2===0){
+        row.innerHTML=`
+        <div class="box text">${htmlTexto}</div>
+        <div class="box img-box"><img src="imagenes/evento${i+1}.jpg"></div>
+        `;
+    }else{
+        row.innerHTML=`
+        <div class="box img-box"><img src="imagenes/evento${i+1}.jpg"></div>
+        <div class="box text">${htmlTexto}</div>
+        `;
+    }
+
+    container.appendChild(row);
+});
+
+const rows = document.querySelectorAll(".row");
+
+window.addEventListener("scroll",()=>{
+    rows.forEach(r=>{
+        if(r.getBoundingClientRect().top < window.innerHeight-100){
+            r.classList.add("show");
+        }
+    });
+});
+
+</script>
+<div class="video-link">
+    <a href="https://www.youtube.com/watch?v=_2fpY-spSY4&pp=ygUmaGlzdG9yaWEgZGVsIHBlcnUgeSBjaWVuY2lhcyBzb2NpYWxlcyA%3D" target="_blank">
+        Ver video explicativo 🎬
+    </a>
+</div>
+</body>
+</html>
